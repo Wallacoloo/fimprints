@@ -1,3 +1,5 @@
+#![feature(fs_read_write)]
+
 extern crate polly;
 extern crate serde;
 #[macro_use]
@@ -45,11 +47,15 @@ fn main() {
 
     // Load templates
     for s in stories {
+        let as_val = serde_json::to_value(&s).unwrap();
+        let json = as_val.as_object().unwrap().clone().into_iter().collect();
+        println!("json: {:?}", json);
+
         let story_brief_template = Template::load(templates_dir.join("story_brief.polly"))
-            .expect("Unable to load story_brief.polly template");
-        //let as_val = serde_json::to_value(&s).unwrap();
-        //let json = as_val.as_object().unwrap().clone().into_iter().collect();
-        //story_brief_template.json(json);
+            .expect("Unable to load story_brief.polly template")
+            .no_locales()
+            .json(json);
+        println!("Rendered: {}", story_brief_template.unwrap_render("en"));
         println!("Story: {:?}", s);
     }
 }

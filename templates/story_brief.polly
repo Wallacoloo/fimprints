@@ -1,0 +1,6 @@
+/!DOCTYPE(html)
+/html {
+    /body {
+        /p { Story id: @fimfic_id, url: @order_page\. }
+    }
+}

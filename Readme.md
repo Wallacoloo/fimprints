@@ -21,7 +21,7 @@ click [here](https://github.com/Wallacoloo/fimprints/new/master/stories))!
 
 ## Building
 To build the website, clone the repository, install `rustup`, switch to the
-nightly version of rust with `rustup default nightly` and then
+nightly version of rust with `rustup default nightly` and then:
 ```
 [fimprints]$ cargo build
 [fimprints]$ cargo run -- --input . --output website_root

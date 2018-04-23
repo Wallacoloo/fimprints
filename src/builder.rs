@@ -1,6 +1,8 @@
+use handlebars as hb;
 use handlebars::Handlebars;
 use pathdiff::diff_paths;
-use std::fs::OpenOptions;
+use serde_json;
+use std::fs::{create_dir_all, OpenOptions};
 use std::io;
 use std::path::{Path, PathBuf};
 
@@ -18,6 +20,8 @@ pub struct StoryData {
     meta: Story,
     /// Path to story data, relative to src/build root.
     dir: PathBuf,
+    /// Path to the thumb, relative to src/build root.
+    thumb_path: Option<PathBuf>,
 }
 
 impl Builder {
@@ -50,17 +54,21 @@ impl Builder {
             src_tree_root: &'a PathBuf,
             build_tree_root: &'a PathBuf,
             stories: &'a Vec<StoryData>,
+            output_path_from_build_root: &'a Path,
         }
+        create_dir_all(page.as_ref().parent().unwrap())
+            .expect("Unable to create output directory");
         let mut file = OpenOptions::new()
             .create(true)
             .truncate(true)
             .write(true)
-            .open(page)
+            .open(page.as_ref())
             .expect("Unable to open output file for writing");
         let data = RenderData {
             src_tree_root: &self.src_tree_root,
             build_tree_root: &self.build_tree_root,
             stories: &self.stories,
+            output_path_from_build_root: page.as_ref(),
         };
         self.reg.render_to_write(&("pages/".to_string() + template), &data, &mut file)
             .expect("failed to build page");
@@ -72,28 +80,34 @@ impl Builder {
 
 impl StoryData {
     fn from_dir<D: AsRef<Path>>(b: &Builder, dir: D) -> Self {
+        let meta = Story::from_path(dir.as_ref().join("meta.toml"));
+        let dir = diff_paths(dir.as_ref(), &b.src_tree_root)
+                .expect("failed to diff paths");
+        let thumb_path = meta.thumb_path.clone().map(|p| dir.join(p));
         Self {
-            meta: Story::from_path(dir.as_ref().join("meta.toml")),
-            dir: diff_paths(dir.as_ref(), &b.src_stories_dir())
-                .expect("failed to diff paths"),
+            meta,
+            dir,
+            thumb_path,
         }
     }
 }
 
 fn init_templates(reg: &mut Handlebars, templates_dir: &Path) {
-    //fn hex_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
-    //    // just for example, add error check for unwrap
-    //    let param = h.param(0).unwrap().value();
-    //    let rendered = format!("0x{:x}", param.as_u64().unwrap());
-    //    try!(rc.writer.write(rendered.into_bytes().as_ref()));
-    //    Ok(())
-    //}
-    //fn render_path(h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
-    //    let param = h.param(0).expect("helper expected one parameter; found none").value();
-    //    let output_file = rc.evaluate("output_path_from_build_root")
-    //        .expect("Unknown output path");
-    //    Ok(())
-    //}
+    /// Given a path to some resource inside the repository root, emits into
+    /// the template a path relative to the page _currently being rendered_.
+    /// This provides a way to track absolute paths internally, and transform
+    /// them to relative, HTML-safe paths at render time.
+    fn render_path(h: &hb::Helper, _: &Handlebars, rc: &mut hb::RenderContext) -> Result<(), hb::RenderError> {
+        let param = h.param(0).expect("helper expected one parameter; found none").value();
+        let param: PathBuf = serde_json::from_value(param.clone()).unwrap();
+        let output_file = rc.evaluate_absolute("output_path_from_build_root", true)
+            .expect("Unknown output path");
+        let output_file: PathBuf = serde_json::from_value(output_file.clone()).unwrap();
+        let output_dir = output_file.parent().unwrap();
+        let relative_path = diff_paths(&param, &output_dir).unwrap();
+        rc.writer.write(relative_path.to_str().unwrap().as_bytes()).unwrap();
+        Ok(())
+    }
 
     // Error on using undefined variables
     reg.set_strict_mode(true);
@@ -101,6 +115,7 @@ fn init_templates(reg: &mut Handlebars, templates_dir: &Path) {
     let partials_dir = templates_dir.join("partials");
     let layouts_dir = partials_dir.join("layouts");
 
+    reg.register_helper("render_path", Box::new(render_path));
     reg.register_template_file("layouts/base", layouts_dir.join("base.hbs"))
         .expect("Unable to load 'layouts/base' template");
     reg.register_template_file("partials/story_brief", partials_dir.join("story_brief.hbs"))

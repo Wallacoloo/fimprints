@@ -1,3 +1,4 @@
+#![feature(nll)]
 #![feature(fs_read_write)]
 
 extern crate handlebars;
@@ -13,6 +14,7 @@ extern crate toml;
 mod builder;
 mod story;
 
+use std::fs;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -35,7 +37,10 @@ fn main() {
     // Parse arguments
     let args = CliArgs::from_args();
 
-    let builder = Builder::new(args.in_dir, args.out_dir);
+    let builder = Builder::new(
+        fs::canonicalize(args.in_dir).unwrap(),
+        fs::canonicalize(args.out_dir).unwrap()
+    );
 
     builder.build_page("index.html", "index");
 }

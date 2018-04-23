@@ -10,6 +10,8 @@ pub struct Story {
     fimfic_id: Option<u32>,
     /// Link to where one can purchase the story
     order_page: Option<String>,
+    /// Path to a story thumbnail, relative to the story's .toml file
+    thumb_path: Option<String>,
 }
 
 impl Story {

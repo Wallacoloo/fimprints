@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Colin Wallace <colin@mooooo.ooo>"]
 
 [dependencies]
+fs_extra = "1.1"
 handlebars = "0.32"
 pathdiff = "0.1"
 serde = "1.0"

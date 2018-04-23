@@ -56,13 +56,14 @@ impl Builder {
             stories: &'a Vec<StoryData>,
             output_path_from_build_root: &'a Path,
         }
-        create_dir_all(page.as_ref().parent().unwrap())
+        let out_path = self.build_tree_root.join(page.as_ref());
+        create_dir_all(out_path.parent().unwrap())
             .expect("Unable to create output directory");
         let mut file = OpenOptions::new()
             .create(true)
             .truncate(true)
             .write(true)
-            .open(page.as_ref())
+            .open(out_path)
             .expect("Unable to open output file for writing");
         let data = RenderData {
             src_tree_root: &self.src_tree_root,

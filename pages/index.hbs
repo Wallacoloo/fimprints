@@ -1,0 +1,9 @@
+{{#> layouts/base title="Fimprints: dead-tree My Little Pony fanfiction prints" }}
+{{#*inline "content-block"}}
+    <p> Source path: {{src_tree_root}}
+    <p> Build path: {{build_tree_root}}
+    {{#each stories}}
+        Order page: {{meta.order_page}}
+    {{/each}}
+{{/inline}}
+{{/layouts/base}}

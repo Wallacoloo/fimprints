@@ -24,16 +24,14 @@ impl Builder {
     pub fn new<S, B>(src_tree_root: S, build_tree_root: B) -> Self
         where S: Into<PathBuf> + AsRef<Path>, B: Into<PathBuf>
     {
-        let templates_dir = src_tree_root.as_ref().join("templates");
-
-        let reg = init_templates(templates_dir);
-
         let mut me = Self {
             src_tree_root: src_tree_root.into(),
             build_tree_root: build_tree_root.into(),
-            reg: reg,
+            reg: Handlebars::new(),
             stories: vec![],
         };
+        init_templates(&mut me.reg, &me.src_tree_root);
+
         // Collect all the stories from the input directory
         let stories : io::Result<Vec<StoryData>> = me.src_stories_dir().read_dir()
             .expect("unable to read input directory")
@@ -64,7 +62,7 @@ impl Builder {
             build_tree_root: &self.build_tree_root,
             stories: &self.stories,
         };
-        self.reg.render_to_write(template, &data, &mut file)
+        self.reg.render_to_write(&("pages/".to_string() + template), &data, &mut file)
             .expect("failed to build page");
     }
     fn src_stories_dir(&self) -> PathBuf {
@@ -82,7 +80,7 @@ impl StoryData {
     }
 }
 
-fn init_templates(templates_dir: PathBuf) -> Handlebars {
+fn init_templates(reg: &mut Handlebars, templates_dir: &Path) {
     //fn hex_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
     //    // just for example, add error check for unwrap
     //    let param = h.param(0).unwrap().value();
@@ -97,12 +95,16 @@ fn init_templates(templates_dir: PathBuf) -> Handlebars {
     //    Ok(())
     //}
 
-    let mut reg = Handlebars::new();
     // Error on using undefined variables
     reg.set_strict_mode(true);
-    reg.register_template_file("story_brief", templates_dir.join("story_brief.hbs"))
-        .expect("Unable to load 'story_brief.hbs' template");
-    reg.register_template_file("index", templates_dir.join("index.hbs"))
-        .expect("Unable to load 'index.hbs' template");
-    reg
+    let pages_dir = templates_dir.join("pages");
+    let partials_dir = templates_dir.join("partials");
+    let layouts_dir = partials_dir.join("layouts");
+
+    reg.register_template_file("layouts/base", layouts_dir.join("base.hbs"))
+        .expect("Unable to load 'layouts/base' template");
+    reg.register_template_file("partials/story_brief", partials_dir.join("story_brief.hbs"))
+        .expect("Unable to load 'partials/story_brief' template");
+    reg.register_template_file("pages/index", pages_dir.join("index.hbs"))
+        .expect("Unable to load 'pages/index' template");
 }

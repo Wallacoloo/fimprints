@@ -1,0 +1,48 @@
+/* Site-wide CSS rules */
+body {
+		background-color: #fff4e6;
+}
+x-page-content {
+		display: block;
+		margin: auto;
+		max-width: 400mm;
+}
+x-story-brief {
+		display: inline-block;
+		font-family: 'Gentium Basic';
+		font-size: 16pt;
+		padding: 5mm;
+}
+x-story-brief x-author-title {
+		display: block;
+		font-family: 'Lora';
+		font-size: 24pt;
+}
+x-author-title x-author {
+		color: #0f4e62;
+}
+/*
+x-author-title x-author .author {
+		text-decoration: underline;
+		text-decoration-color: #00a0d0;
+}
+*/
+x-author-title x-author .title {
+		color: #101010;
+}
+x-story-brief .order {
+		display: block;
+}
+x-story-brief .synopsis {
+		display: inline;
+}
+x-story-brief .thumb {
+		float: left;
+		max-width: 16%;
+		min-width: 40mm;
+		padding-left: 2mm;
+		padding-right: 4mm;
+}
+x-story-brief .title {
+		font-style: italic;
+}

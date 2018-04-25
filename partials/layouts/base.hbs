@@ -1,10 +1,16 @@
 {{!-- base layout for all pages. --}}
+<!DOCTYPE html>
 <html>
 <head>
-<title>{{title}}</title>
+		{{!-- Keep the meta charset tag here for offline viewing --}}
+		<meta charset='utf-8'>
+		<title>{{title}}</title>
+		<link rel='stylesheet' href='{{render_path "static/global.css"}}'>
 </head>
 <body>
-{{> content-block}}
+		<x-page-content>
+				{{> content-block}}
+		</x-page-content>
 </body>
 </html>
 

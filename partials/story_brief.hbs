@@ -1,6 +1,9 @@
-<div>
-    <p>{{meta.author}} - {{meta.title}}<p>
-    <img src="{{render_path thumb_path}}">
-    <p>{{meta.synopsis}}</p>
-    <p><a href="{{meta.order_url}}">Order</a></p>
-</div>
+<x-story-brief>
+    <x-author-title>
+		<x-author>[<a class='author'>{{meta.author}}</a>]</x-author>
+		<a class='title'>{{meta.title}}</a>
+	</x-author-title>
+    <img class='thumb' src='{{render_path thumb_path}}'>
+    <p class='synopsis'>{{meta.synopsis}}</p>
+    <a class='order' href='{{meta.order_url}}'>Order</a>
+</x-story-brief>

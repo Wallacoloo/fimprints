@@ -48,12 +48,12 @@ fn main() {
 
     builder.build_page("index.html", "index");
     // Copy resources
-    copy_items(&vec![in_dir.join("stories")], &out_dir.join("stories"), &CopyOptions {
+    copy_items(&vec![in_dir.join("static"), in_dir.join("stories")], &out_dir, &CopyOptions {
         overwrite: true,
-        skip_exist: true,
+        skip_exist: false,
         buffer_size: 64000,
         copy_inside: true,
         depth: 0,
-    }).expect("Unable to copy story data to output directory");
+    }).expect("Unable to copy static data to output directory");
 }
 

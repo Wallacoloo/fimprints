@@ -39,3 +39,7 @@ structure.
 `partials/` contains the partial templates used to render excerpts that might
 be shared across pages (like story blurbs).
 
+
+## Further Reading
+* This website is in many ways a rebirth of [this](https://docs.google.com/spreadsheets/d/19xwrvjCTPP8cqU01VLAmw7nTO8lLvyYrQ4Eatg8S0dY/edit#gid=2062495714) old Google Docs spreadsheet, but with the intent that it can live on easier if the creator abandons it (e.g. people can fork it, or ownership can be transferred to an organization with multiple owners).
+* If you enjoy MLP fanfiction prints, or if you want to stay up to date on one-time prints, check out the [eBook Production](https://discord.gg/C3p9UNy) Discord server.

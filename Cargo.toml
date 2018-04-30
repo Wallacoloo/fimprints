@@ -4,11 +4,16 @@ version = "0.1.0"
 authors = ["Colin Wallace <colin@mooooo.ooo>"]
 
 [dependencies]
+env_logger = "0.5"
 fs_extra = "1.1"
 handlebars = "0.32"
+log = "0.4"
 pathdiff = "0.1"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
 structopt = "0.2"
 toml = "0.4"
+
+[dependencies.fimfiction-api]
+path = "fimfiction-api"

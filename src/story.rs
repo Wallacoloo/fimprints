@@ -1,3 +1,4 @@
+use fimfiction_api::ContentRating;
 use std::fs;
 use std::path::Path;
 use toml;
@@ -18,11 +19,24 @@ pub struct Story {
     pub title: Option<String>,
     /// Brief text-only synopsis. Expect html codes to be escaped.
     pub synopsis: Option<String>,
+    /// How many words in the story
+    pub num_words: Option<u32>,
+    /// Sum of all views across all chapters
+    pub total_num_views: Option<u32>,
+    /// e.g. Everyone, Teen, Mature.
+    pub content_rating: Option<ContentRating>,
+    /// Number of likes on fimfiction (or any other platform)
+    pub num_likes: Option<u32>,
+    /// Number of dislikes on fimfiction (or any other platform)
+    pub num_dislikes: Option<u32>,
 }
 
 impl Story {
     /// Parse a story from a file on disk
     pub fn from_path<P: AsRef<Path>>(path: P) -> Self {
         toml::from_str(&fs::read_to_string(path).unwrap()).unwrap()
+    }
+    pub fn to_path<P: AsRef<Path>>(&self, path: P) {
+        fs::write(path, toml::to_string_pretty(&self).unwrap()).unwrap();
     }
 }

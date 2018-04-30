@@ -1,8 +1,12 @@
 #![feature(nll)]
 #![feature(fs_read_write)]
 
+extern crate env_logger;
+extern crate fimfiction_api;
 extern crate fs_extra;
 extern crate handlebars;
+#[macro_use]
+extern crate log;
 extern crate pathdiff;
 extern crate serde;
 #[macro_use]
@@ -15,8 +19,10 @@ extern crate toml;
 mod builder;
 mod story;
 
+use fimfiction_api::{Application, ApiResponse};
 use fs_extra::{copy_items, dir::CopyOptions};
 use std::fs;
+use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -32,10 +38,21 @@ struct CliArgs {
     /// path to directory in which to assemble the website
     #[structopt(short = "o", long = "output", parse(from_os_str))]
     out_dir: PathBuf,
+    /// Pull fresh metadata for all stories (from fimfiction.net)
+    #[structopt(short = "u", long = "update")]
+    update_stories: bool,
+}
+
+/// Data needed to obtain API access from fimfiction.net.
+#[derive(Deserialize)]
+struct FimficApiInfo {
+    client_id: String,
+    client_secret: String,
 }
 
 
 fn main() {
+    env_logger::init();
     // Parse arguments
     let args = CliArgs::from_args();
 
@@ -44,7 +61,48 @@ fn main() {
         .expect("Unable to create output directory");
     let out_dir = fs::canonicalize(args.out_dir).unwrap();
 
-    let builder = Builder::new(&in_dir, &out_dir);
+    let mut builder = Builder::new(&in_dir, &out_dir);
+    
+    if args.update_stories {
+        debug!("Updating stories");
+        //let resp: ApiResponse = serde_json::from_reader(File::open(".debug.story").unwrap()).unwrap();
+        //println!("parsed from disk: {:?}", resp);
+        let api_info: FimficApiInfo = toml::from_str(
+            &fs::read_to_string(in_dir.join("fimfic-api.toml")).unwrap()
+        ).unwrap();
+        let app = Application::authorize_from_client_credentials(&api_info.client_id, &api_info.client_secret).unwrap();
+        for story in builder.stories.iter_mut() {
+            if let Some(id) = story.meta.fimfic_id {
+                trace!("Updating story {}", id);
+                match app.story(id) {
+                    Err(err) => warn!("Unable to fetch fimfiction info for story {}: {:?}", id, err),
+                    Ok(res) => {
+                        story.meta.title = Some(res.data.attributes.title);
+                        story.meta.synopsis = Some(res.data.attributes.description);
+                        story.meta.num_words = Some(res.data.attributes.num_words);
+                        story.meta.total_num_views = Some(res.data.attributes.total_num_views);
+                        story.meta.content_rating = Some(res.data.attributes.content_rating);
+                        story.meta.num_likes = Some(res.data.attributes.num_likes);
+                        story.meta.num_dislikes = Some(res.data.attributes.num_dislikes);
+                        //let author_id = res.data.relationships.author.data.id;
+                        //match app.user(author_id) {
+                        //    Err(err) => warn!("Unable to fetch fimfiction info for author {}: {:?}", author_id, err),
+                        //    Ok(user) => {
+                        //        story.meta.author = Some(user.data.name);
+                        //    }
+                        //}
+                        story.update_on_disk();
+                    }
+                }
+            }
+        }
+        //println!("blog_post: {:?}", app.blog_post(808406));
+        //println!("bookshelf: {:?}", app.bookshelf(16299));
+        ////println!("chapter: {:?}", app.chapter(0));
+        //println!("group: {:?}", app.group(209275));
+        //println!("story: {:?}", app.story(141549));
+        //println!("user: {:?}", app.user(33084));
+    }
 
     builder.build_page("index.html", "index");
     // Copy resources

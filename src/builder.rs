@@ -12,12 +12,12 @@ pub struct Builder {
     src_tree_root: PathBuf,
     build_tree_root: PathBuf,
     reg: Handlebars,
-    stories: Vec<StoryData>,
+    pub stories: Vec<StoryData>,
 }
 
 #[derive(Serialize)]
 pub struct StoryData {
-    meta: Story,
+    pub meta: Story,
     /// Path to story data, relative to src/build root.
     dir: PathBuf,
     /// Path to the thumb, relative to src/build root.
@@ -90,6 +90,10 @@ impl StoryData {
             dir,
             thumb_path,
         }
+    }
+    pub fn update_on_disk(&self) {
+        // TODO: we need to get the _absolute path_
+        self.meta.to_path("test.toml");
     }
 }
 

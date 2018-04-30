@@ -1,3 +1,4 @@
 /target
 /web
 **/*.rs.bk
+fimfic-api.toml

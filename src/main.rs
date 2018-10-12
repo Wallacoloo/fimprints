@@ -66,7 +66,8 @@ fn main() {
         //let resp: ApiResponse = serde_json::from_reader(File::open(".debug.story").unwrap()).unwrap();
         //println!("parsed from disk: {:?}", resp);
         let api_info: FimficApiInfo = toml::from_str(
-            &fs::read_to_string(in_dir.join("fimfic-api.toml")).unwrap()
+            &fs::read_to_string(in_dir.join("fimfic-api.toml"))
+                .expect("to use the auto-updater, populate fimfic-api.toml with your fimfiction `client_id` and `client_secret`.")
         ).unwrap();
         let app = Application::authorize_from_client_credentials(&api_info.client_id, &api_info.client_secret).unwrap();
         for story in builder.stories.iter_mut() {

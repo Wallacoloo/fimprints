@@ -1,5 +1,4 @@
 #![feature(nll)]
-#![feature(fs_read_write)]
 
 extern crate env_logger;
 extern crate fimfiction_api;
@@ -12,7 +11,6 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
-#[macro_use]
 extern crate structopt;
 extern crate toml;
 

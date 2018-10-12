@@ -20,8 +20,12 @@ click [here](https://github.com/Wallacoloo/fimprints/new/master/stories))!
 
 
 ## Building
-To build the website, clone the repository, install `rustup`, switch to the
-nightly version of rust with `rustup default nightly` and then:
+To build the website, clone the repository and also clone [fimfiction-api-rust](https://github.com/Wallacoloo/fimfiction-api-rust) into the fimfiction-api directory:
+```
+git clone 'https://github.com/Wallacoloo/fimfiction-api-rust.git' fimfiction-api
+```
+Then, install `rustup`, switch to the
+nightly version of rust with `rustup default nightly` and build using Cargo.:
 ```
 [fimprints]$ cargo build
 [fimprints]$ cargo run -- --input . --output website_root

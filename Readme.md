@@ -33,6 +33,15 @@ nightly version of rust with `rustup default nightly` and build using Cargo.:
 This builds fimprints as a static website. You can open `website_root/index.html`
 in a webbrowser, or publish that directory to some domain name, etc.
 
+## Updating metadata
+After adding a toml file as described above, the following command will populate
+it with extra metadata and fetch the story cover image from fimfiction:
+```
+cargo run -- --input . --output website_root --update
+```
+
+For debugging, set the `RUST_LOG` environment variable first, e.g. `RUST_LOG=debug`.
+
 ## Development
 Templates use the `handlebars` library.
 We store templates in a directory structure similar to that outlined

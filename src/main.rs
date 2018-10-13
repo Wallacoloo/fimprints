@@ -1,5 +1,6 @@
 #![feature(nll)]
 
+extern crate bbcode;
 extern crate env_logger;
 extern crate fimfiction_api;
 extern crate fs_extra;
@@ -89,7 +90,7 @@ fn main() {
                                 }
                             }
                         }
-                        story.update_on_disk();
+                        story.update_on_disk(&in_dir);
                     }
                 }
             }

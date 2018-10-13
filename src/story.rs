@@ -37,6 +37,7 @@ impl Story {
         toml::from_str(&fs::read_to_string(path).unwrap()).unwrap()
     }
     pub fn to_path<P: AsRef<Path>>(&self, path: P) {
+        info!("writing story to {:?}", path.as_ref());
         fs::write(path, toml::to_string_pretty(&self).unwrap()).unwrap();
     }
 }

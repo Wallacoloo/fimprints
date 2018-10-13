@@ -1,3 +1,4 @@
+use bbcode::BBCode;
 use handlebars as hb;
 use handlebars::Handlebars;
 use pathdiff::diff_paths;
@@ -89,13 +90,22 @@ impl StoryData {
             thumb_path,
         }
     }
-    pub fn update_on_disk(&self) {
+    pub fn update_on_disk<S: AsRef<Path>>(&self, src_tree_root: S) {
         // TODO: we need to get the _absolute path_
-        self.meta.to_path("test.toml");
+        let path = src_tree_root.as_ref().join(&self.dir).join("meta.toml");
+        self.meta.to_path(path);
     }
 }
 
 fn init_templates(reg: &mut Handlebars, templates_dir: &Path) {
+    /// Given a bbcode string, decode it to html.
+    fn bbcode_to_html(h: &hb::Helper, _: &Handlebars, rc: &mut hb::RenderContext) -> Result<(), hb::RenderError> {
+        let param = h.param(0).expect("helper expected one parameter; found none").value();
+        let bbcode: String = serde_json::from_value(param.clone()).unwrap();
+        let html = bbcode.as_str().as_html();
+        rc.writer.write(html.as_bytes()).unwrap();
+        Ok(())
+    }
     /// Given a path to some resource inside the repository root, emits into
     /// the template a path relative to the page _currently being rendered_.
     /// This provides a way to track absolute paths internally, and transform
@@ -118,6 +128,7 @@ fn init_templates(reg: &mut Handlebars, templates_dir: &Path) {
     let partials_dir = templates_dir.join("partials");
     let layouts_dir = partials_dir.join("layouts");
 
+    reg.register_helper("bbcode_to_html", Box::new(bbcode_to_html));
     reg.register_helper("render_path", Box::new(render_path));
     reg.register_template_file("layouts/base", layouts_dir.join("base.hbs"))
         .expect("Unable to load 'layouts/base' template");

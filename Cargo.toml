@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Colin Wallace <colin@mooooo.ooo>"]
 
 [dependencies]
+bbcode = "1.0"
 env_logger = "0.5"
 fs_extra = "1.1"
 handlebars = "0.32"

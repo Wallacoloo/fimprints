@@ -4,6 +4,6 @@
 		<a class='title'>{{meta.title}}</a>
 	</x-author-title>
     <img class='thumb' src='{{render_path thumb_path}}'>
-    <p class='synopsis'>{{meta.synopsis}}</p>
+    <p class='synopsis'>{{bbcode_to_html meta.synopsis}}</p>
     <a class='order' href='{{meta.order_url}}'>Order</a>
 </x-story-brief>

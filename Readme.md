@@ -28,7 +28,7 @@ Then, install `rustup`, switch to the
 nightly version of rust with `rustup default nightly` and build using Cargo.:
 ```
 [fimprints]$ cargo build
-[fimprints]$ cargo run -- --input . --output website_root
+[fimprints]$ cargo run -- --output website_root
 ```
 This builds fimprints as a static website. You can open `website_root/index.html`
 in a webbrowser, or publish that directory to some domain name, etc.
@@ -37,7 +37,7 @@ in a webbrowser, or publish that directory to some domain name, etc.
 After adding a toml file as described above, the following command will populate
 it with extra metadata and fetch the story cover image from fimfiction:
 ```
-cargo run -- --input . --output website_root --update
+cargo run -- --update
 ```
 
 For debugging, set the `RUST_LOG` environment variable first, e.g. `RUST_LOG=debug`.

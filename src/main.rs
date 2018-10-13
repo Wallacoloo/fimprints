@@ -31,11 +31,11 @@ use builder::Builder;
 #[structopt(name = "fimprints")]
 struct CliArgs {
     /// path to directory containing the site sources (e.g. story files)
-    #[structopt(short = "i", long = "input", parse(from_os_str))]
+    #[structopt(short = "i", long = "input", parse(from_os_str), default_value = ".")]
     in_dir: PathBuf,
     /// path to directory in which to assemble the website
     #[structopt(short = "o", long = "output", parse(from_os_str))]
-    out_dir: PathBuf,
+    out_dir: Option<PathBuf>,
     /// Pull fresh metadata for all stories (from fimfiction.net)
     #[structopt(short = "u", long = "update")]
     update_stories: bool,
@@ -55,14 +55,10 @@ fn main() {
     let args = CliArgs::from_args();
 
     let in_dir = fs::canonicalize(args.in_dir).unwrap();
-    fs::create_dir_all(&args.out_dir)
-        .expect("Unable to create output directory");
-    let out_dir = fs::canonicalize(args.out_dir).unwrap();
+    let mut builder = Builder::new(&in_dir);
 
-    let mut builder = Builder::new(&in_dir, &out_dir);
-    
     if args.update_stories {
-        debug!("Updating stories");
+        info!("Updating stories");
         //let resp: ApiResponse = serde_json::from_reader(File::open(".debug.story").unwrap()).unwrap();
         //println!("parsed from disk: {:?}", resp);
         let api_info: FimficApiInfo = toml::from_str(
@@ -72,7 +68,7 @@ fn main() {
         let app = Application::authorize_from_client_credentials(&api_info.client_id, &api_info.client_secret).unwrap();
         for story in builder.stories.iter_mut() {
             if let Some(id) = story.meta.fimfic_id {
-                trace!("Updating story {}", id);
+                info!("Updating story {}", id);
                 match app.story(id) {
                     Err(err) => warn!("Unable to fetch fimfiction info for story {}: {:?}", id, err),
                     Ok(res) => {
@@ -103,14 +99,20 @@ fn main() {
         //println!("user: {:?}", app.user(33084));
     }
 
-    builder.build_page("index.html", "index");
-    // Copy resources
-    copy_items(&vec![in_dir.join("static"), in_dir.join("stories")], &out_dir, &CopyOptions {
-        overwrite: true,
-        skip_exist: false,
-        buffer_size: 64000,
-        copy_inside: true,
-        depth: 0,
-    }).expect("Unable to copy static data to output directory");
+    if let Some(out_dir) = args.out_dir {
+        let out_dir = fs::canonicalize(out_dir).unwrap();
+        fs::create_dir_all(&out_dir)
+            .expect("Unable to create output directory");
+
+        builder.build_page("index.html", "index", &out_dir);
+        // Copy resources
+        copy_items(&vec![in_dir.join("static"), in_dir.join("stories")], &out_dir, &CopyOptions {
+            overwrite: true,
+            skip_exist: false,
+            buffer_size: 64000,
+            copy_inside: true,
+            depth: 0,
+        }).expect("Unable to copy static data to output directory");
+    }
 }
 

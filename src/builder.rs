@@ -10,7 +10,6 @@ use story::Story;
 
 pub struct Builder {
     src_tree_root: PathBuf,
-    build_tree_root: PathBuf,
     reg: Handlebars,
     pub stories: Vec<StoryData>,
 }
@@ -25,12 +24,11 @@ pub struct StoryData {
 }
 
 impl Builder {
-    pub fn new<S, B>(src_tree_root: S, build_tree_root: B) -> Self
-        where S: Into<PathBuf> + AsRef<Path>, B: Into<PathBuf>
+    pub fn new<S>(src_tree_root: S) -> Self
+        where S: Into<PathBuf> + AsRef<Path>
     {
         let mut me = Self {
             src_tree_root: src_tree_root.into(),
-            build_tree_root: build_tree_root.into(),
             reg: Handlebars::new(),
             stories: vec![],
         };
@@ -48,7 +46,7 @@ impl Builder {
     /// Render the page and write it to disk.
     /// template is the human-friendly template name,
     /// page is the path in the build tree at which to place the built page.
-    pub fn build_page<P: AsRef<Path>>(&self, page: P, template: &str) {
+    pub fn build_page<P: AsRef<Path>, B: AsRef<Path>>(&self, page: P, template: &str, build_tree_root: B) {
         #[derive(Serialize)]
         struct RenderData<'a> {
             src_tree_root: &'a PathBuf,
@@ -56,7 +54,7 @@ impl Builder {
             stories: &'a Vec<StoryData>,
             output_path_from_build_root: &'a Path,
         }
-        let out_path = self.build_tree_root.join(page.as_ref());
+        let out_path = build_tree_root.as_ref().join(page.as_ref());
         create_dir_all(out_path.parent().unwrap())
             .expect("Unable to create output directory");
         let mut file = OpenOptions::new()
@@ -67,7 +65,7 @@ impl Builder {
             .expect("Unable to open output file for writing");
         let data = RenderData {
             src_tree_root: &self.src_tree_root,
-            build_tree_root: &self.build_tree_root,
+            build_tree_root: &build_tree_root.as_ref().to_owned(),
             stories: &self.stories,
             output_path_from_build_root: page.as_ref(),
         };

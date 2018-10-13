@@ -79,13 +79,16 @@ fn main() {
                         story.meta.content_rating = Some(res.data.attributes.content_rating);
                         story.meta.num_likes = Some(res.data.attributes.num_likes);
                         story.meta.num_dislikes = Some(res.data.attributes.num_dislikes);
-                        //let author_id = res.data.relationships.author.data.id;
-                        //match app.user(author_id) {
-                        //    Err(err) => warn!("Unable to fetch fimfiction info for author {}: {:?}", author_id, err),
-                        //    Ok(user) => {
-                        //        story.meta.author = Some(user.data.name);
-                        //    }
-                        //}
+                        if let Some(rel) = res.data.relationships {
+                            let author_id = rel.author.data.id;
+                            match app.user(author_id.parse().unwrap()) {
+                                Err(err) => warn!("Unable to fetch fimfiction info for author {}: {:?}", author_id, err),
+                                Ok(user) => {
+                                    info!("Updating story author to {}", user.data.attributes.name);
+                                    story.meta.author = Some(user.data.attributes.name);
+                                }
+                            }
+                        }
                         story.update_on_disk();
                     }
                 }
